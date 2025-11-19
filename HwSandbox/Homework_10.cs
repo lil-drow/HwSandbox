@@ -148,7 +148,7 @@ namespace HwSandbox
             return Console.ReadLine();
         }
 
-        // задача для подсчёта заданных символов
+        // функция для подсчёта заданных символов
         private string CountSymbolsInFile(string path, char symbolToCount)
         {
             Stopwatch sw = Stopwatch.StartNew();
