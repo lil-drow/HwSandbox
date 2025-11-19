@@ -26,7 +26,7 @@ namespace HwSandbox
             ProcessNumberOfFiles();
             Console.WriteLine("------------------");
             Console.WriteLine("Пункт 2:");
-            ProcessAllFilesInFolder();
+            ProcessAllFilesInFolder(GetPathToFolder());
             Console.WriteLine("------------------");
             Console.WriteLine("Готово.");
         }
@@ -78,7 +78,7 @@ namespace HwSandbox
             }
             Console.WriteLine($"Общее время подсчёта {results.Length} файлов: {sw_1.Elapsed}");
         }
-        private void ProcessAllFilesInFolder()
+        private string GetPathToFolder()
         {
             Console.WriteLine($"Введите путь к папке с текстовыми файлами.\nВнимание! Принимаются только файлы формата .txt!\nПо умолчанию будет выбран путь: {AppDomain.CurrentDomain.BaseDirectory}");
             string? path = Console.ReadLine();
@@ -86,6 +86,10 @@ namespace HwSandbox
             {
                 path = AppDomain.CurrentDomain.BaseDirectory;
             }
+            return path;
+        }
+        private void ProcessAllFilesInFolder(string path)
+        {
             List<string> paths = new List<string>();
             foreach (string filePath in Directory.GetFiles(path))
             {
