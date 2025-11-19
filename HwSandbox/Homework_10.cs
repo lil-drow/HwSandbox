@@ -180,10 +180,6 @@ namespace HwSandbox
             }
 
             string[] resultsArray = await Task.WhenAll(tasks);
-            //foreach (var result in resultsArray)
-            //{
-            //    Console.WriteLine(result);
-            //}
             return resultsArray;
         }
         string[] testMessages = {
