@@ -4,4 +4,6 @@ using HwSandbox;
 Console.WriteLine("Проект для подготовки домашнего задания в рамках обучения на курсе Отус.");
 
 Homework_10 hw10 = new Homework_10();
-hw10.Go();
+//hw10.Go();
+Homework_15 hw15 = new Homework_15();
+hw15.Go();

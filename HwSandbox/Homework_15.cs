@@ -41,48 +41,77 @@ namespace HwSandbox
         {
             
         }
-        //Напишите вычисление суммы элементов массива интов:
-        internal void Go()
+        
+        internal async void Go()
         {
             Console.WriteLine("Лекция 15. Внутрипроцессное взаимодействие:");
             Console.WriteLine("------------------");
 
             // Замерьте время выполнения для 100 000,
-            Stopwatch sw_1 = new Stopwatch();
             Console.WriteLine("Выполнение замеров для суммирования 100 000 элементов.");
-            sw_1.Start();
-            Random random = new Random();
-            sw_1.Stop();
-
+            await Summ(100000);
+            Console.WriteLine("------------------");
             // 1 000 000
             Console.WriteLine("Выполнение замеров для суммирования 1 000 000 элементов.");
-            sw_1.Reset();
-            sw_1.Start();
-
-            sw_1.Stop();
-
+            await Summ(1000000);
+            Console.WriteLine("------------------");
             // и 10 000 000
             Console.WriteLine("Выполнение замеров для суммирования 10 000 000 элементов.");
-            sw_1.Reset();
-            sw_1.Start();
-
-            sw_1.Stop();
-
+            await Summ(10000000);
+            Console.WriteLine("------------------");
+            Console.WriteLine("Готово.");
         }
-        // Обычное
-        private int SummSync(int[] numbers)
+        //Напишите вычисление суммы элементов массива интов:
+        private Task<TimeSpan[]> Summ(int quantity)
         {
-            return 0;
+            // планирую возвращать результат массивом из трёх замеров (sync, parallel_thread и parallel_linq)
+            TimeSpan[] results = new TimeSpan[3];
+            Random random = new Random();
+            int[] nums = new int[quantity];
+            for (int i = 0; i < nums.Length; i++)
+            {
+                nums[i] = random.Next();
+            }
+            // Обычное
+            results[0] = Task.Run(() => SummSync(nums)).Result;
+            // Параллельное (для реализации использовать Thread, например List)
+            results[1] = Task.Run(() => SummParallel_withThread(nums)).Result;
+            // Параллельное с помощью LINQ
+            results[2] =  Task.Run(() => SummParallel_withLinq(nums)).Result;
+            return Task.FromResult(results);
         }
-        // Параллельное (для реализации использовать Thread, например List)
-        private int SummParallel_withThread(int[] numbers)
+        
+        private TimeSpan SummSync(int[] numbers)
         {
-            return 0;
+            int sum = 0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                sum += numbers[i];
+            }
+            sw.Stop();
+            return sw.Elapsed;
         }
-        // Параллельное с помощью LINQ
-        private int SummParallel_withLinq(int[] numbers)
+        
+        private TimeSpan SummParallel_withThread(int[] numbers)
         {
-            return 0;
+            int sum = 0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            //
+            sw.Stop();
+            return sw.Elapsed;
+        }
+        
+        private TimeSpan SummParallel_withLinq(int[] numbers)
+        {
+            int sum = 0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            //
+            sw.Stop();
+            return sw.Elapsed;
         }
     }
 
