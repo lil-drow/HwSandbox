@@ -127,8 +127,8 @@ namespace HwSandbox
             Thread[] threads = new Thread[processors];
             
             int arrPartsCnt = numbers.Length / processors;
-            
-            
+
+            sw.Start();
             for (int i = 0; i < processors; i++)
             {
                 // делим массив по числу вычислительных ядер
@@ -144,13 +144,12 @@ namespace HwSandbox
                     Interlocked.Add(ref sum, currSum);
                 });
                 threads[i] = thread;
+                thread.Start();
             }
-
-            sw.Start();
+            
             // 
             foreach (Thread thread in threads)
             {
-                thread.Start();
                 thread.Join();
             }
             sw.Stop();
