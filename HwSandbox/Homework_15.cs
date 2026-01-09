@@ -143,7 +143,7 @@ namespace HwSandbox
             long sum = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            sum = numbers.AsParallel().Sum();
+            sum = numbers.AsParallel().Select(x => (long)x).Sum();
             sw.Stop();
             Console.WriteLine("parallel with LINQ: " + sum);
             return sw.Elapsed;
