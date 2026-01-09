@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
+using HwSandbox.Abstractions;
 
 namespace HwSandbox
 {
@@ -37,14 +38,12 @@ namespace HwSandbox
 
     Минимальный проходной балл: 8.
     */
-    internal class Homework_15
+    internal class Homework_15: IHomework
     {
-        internal Homework_15()
-        {
-            
-        }
+        IDataWriter? _tableWriter;
+        public Homework_15(IDataWriter? tableWriter) => _tableWriter = tableWriter; 
         
-        internal async void Go()
+        public async void Go()
         {
             Console.WriteLine("Лекция 15. Внутрипроцессное взаимодействие:");
             Console.WriteLine("------------------");
@@ -52,37 +51,27 @@ namespace HwSandbox
             int processors = Environment.ProcessorCount;
             string osVersion = Environment.OSVersion.VersionString;
             
-
-            TableWriter tableWriter = new TableWriter();
-            tableWriter.Add(["Количество вычислительных ядер: ", processors.ToString()]);
-            tableWriter.Add(["Версия ОС: ", osVersion]);
+            _tableWriter.Add(["Количество вычислительных ядер: ", processors.ToString()]);
+            _tableWriter.Add(["Версия ОС: ", osVersion]);
 
             // Замерьте время выполнения для 100 000,
-            tableWriter.Add(["Число интов", "Синхронно", "Параллельно (Threads)", "Параллельно (LINQ)"]);
+            _tableWriter.Add(["Число интов", "Синхронно", "Параллельно (Threads)", "Параллельно (LINQ)"]);
             bool random = true;
-
-            tableWriter.Add(await GetSummResults(100000, random));
-
+            _tableWriter.Add(await GetSummResults(100000, random));
             // 1 000 000
-            tableWriter.Add(await GetSummResults(1000000, random));
-
+            _tableWriter.Add(await GetSummResults(1000000, random));
             // и 10 000 000
-            tableWriter.Add(await GetSummResults(10000000, random));
-
+            _tableWriter.Add(await GetSummResults(10000000, random));
 
             // дополнительный тест с другой выборкой (что, если взять не рандомные числа, а последовательные)
             random = false;
-
-            tableWriter.Add(await GetSummResults(100000, random));
-
+            _tableWriter.Add(await GetSummResults(100000, random));
             // 1 000 000
-            tableWriter.Add(await GetSummResults(1000000, random));
-
+            _tableWriter.Add(await GetSummResults(1000000, random));
             // и 10 000 000
-            tableWriter.Add(await GetSummResults(10000000, random));
+            _tableWriter.Add(await GetSummResults(10000000, random));
 
-
-            tableWriter.Write();
+            _tableWriter.Write();
             Console.WriteLine("Готово.");
         }
         private async Task<string[]> GetSummResults(int quantity, bool random)

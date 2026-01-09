@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HwSandbox.Abstractions;
 
 namespace HwSandbox
 {
@@ -12,13 +13,13 @@ namespace HwSandbox
     // Пункт 1: Прочитать 3 файла параллельно и вычислить количество пробелов в них (через Task).
     // Пункт 2: Написать функцию, принимающую в качестве аргумента путь к папке. Из этой папки параллельно прочитать все файлы и вычислить количество пробелов в них.
     //Замерьте время выполнения кода (класс Stopwatch).
-    internal class Homework_10
+    internal class Homework_10: IHomework
     {
         internal Homework_10()
         {
 
         }
-        internal async void Go()
+        public void Go()
         {
             Console.WriteLine("Лекция 10. Введение в параллелеризм:");
             Console.WriteLine("------------------");
