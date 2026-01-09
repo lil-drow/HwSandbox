@@ -59,24 +59,40 @@ namespace HwSandbox
 
             // Замерьте время выполнения для 100 000,
             tableWriter.Add(["Число интов", "Синхронно", "Параллельно (Threads)", "Параллельно (LINQ)"]);
-            tableWriter.Add(await GetSummResults(100000));
+            bool random = true;
+
+            tableWriter.Add(await GetSummResults(100000, random));
 
             // 1 000 000
-            tableWriter.Add(await GetSummResults(1000000));
+            tableWriter.Add(await GetSummResults(1000000, random));
 
             // и 10 000 000
-            tableWriter.Add(await GetSummResults(10000000));
+            tableWriter.Add(await GetSummResults(10000000, random));
+
+
+            // дополнительный тест с другой выборкой (что, если взять не рандомные числа, а последовательные)
+            random = false;
+
+            tableWriter.Add(await GetSummResults(100000, random));
+
+            // 1 000 000
+            tableWriter.Add(await GetSummResults(1000000, random));
+
+            // и 10 000 000
+            tableWriter.Add(await GetSummResults(10000000, random));
+
+
             tableWriter.Write();
             Console.WriteLine("Готово.");
         }
-        private async Task<string[]> GetSummResults(int quantity)
+        private async Task<string[]> GetSummResults(int quantity, bool random)
         {
             Console.WriteLine($"Выполнение замеров для суммирования {quantity} элементов.");
             string[] valuesArray = new string[4];
             int cellCounter = 1;
             valuesArray[0] = quantity.ToString();
 
-            foreach (var item in await Summ(quantity))
+            foreach (var item in await Summ(quantity, random))
             {
                 valuesArray[cellCounter++] = item.ToString();
             }
@@ -84,16 +100,11 @@ namespace HwSandbox
             return valuesArray;
         }
         //Напишите вычисление суммы элементов массива интов:
-        private Task<TimeSpan[]> Summ(int quantity)
+        private Task<TimeSpan[]> Summ(int quantity, bool random)
         {
             // планирую возвращать результат массивом из трёх замеров (sync, parallel_thread и parallel_linq)
             TimeSpan[] results = new TimeSpan[3];
-            Random random = new Random();
-            int[] nums = new int[quantity];
-            for (int i = 0; i < nums.Length; i++)
-            {
-                nums[i] = random.Next();
-            }
+            int[] nums = random ? GetNumsArray_randomly(quantity) : GetNumsArray_sequentially(quantity); 
             // Обычное
             results[0] = SummSync(nums);
             // Параллельное (для реализации использовать Thread, например List)
@@ -102,7 +113,23 @@ namespace HwSandbox
             results[2] = SummParallel_withLinq(nums);
             return Task.FromResult(results);
         }
-        
+        private int[] GetNumsArray_randomly(int quantity)
+        {
+            Random random = new Random();
+            int[] nums = new int[quantity];
+            for (int i = 0; i < nums.Length; i++)
+            {
+                nums[i] = random.Next();
+            }
+            return nums;
+        }
+        private int[] GetNumsArray_sequentially(int quantity)
+        {
+            IEnumerable<int> nums = Enumerable.Range(1, quantity);
+            return nums.ToArray();
+        }
+
+
         private TimeSpan SummSync(int[] numbers)
         {
             Console.WriteLine("Start counting sync");
