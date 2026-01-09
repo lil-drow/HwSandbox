@@ -46,10 +46,7 @@ namespace HwSandbox
         {
             Console.WriteLine("Лекция 15. Внутрипроцессное взаимодействие:");
             Console.WriteLine("------------------");
-            
-            int processors = Environment.ProcessorCount;
-            string osVersion = Environment.OSVersion.VersionString;
-            
+
             // Замерьте время выполнения для 100 000,
             Console.WriteLine("Выполнение замеров для суммирования 100 000 элементов.");
             await Summ(100000);
@@ -78,7 +75,7 @@ namespace HwSandbox
             // Обычное
             results[0] = Task.Run(() => SummSync(nums)).Result;
             // Параллельное (для реализации использовать Thread, например List)
-            results[1] = Task.Run(() => SummParallel_withThreads(nums)).Result;
+            results[1] = Task.Run(() => SummParallel_withThread(nums)).Result;
             // Параллельное с помощью LINQ
             results[2] =  Task.Run(() => SummParallel_withLinq(nums)).Result;
             return Task.FromResult(results);
@@ -86,8 +83,7 @@ namespace HwSandbox
         
         private TimeSpan SummSync(int[] numbers)
         {
-            Console.WriteLine("Start counting sync");
-            long sum = 0;
+            int sum = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
             for (int i = 0; i < numbers.Length; i++)
@@ -95,57 +91,26 @@ namespace HwSandbox
                 sum += numbers[i];
             }
             sw.Stop();
-            Console.WriteLine("sync: " + sum);
             return sw.Elapsed;
         }
         
-        private TimeSpan SummParallel_withThreads(int[] numbers)
+        private TimeSpan SummParallel_withThread(int[] numbers)
         {
-            Console.WriteLine("Start counting parallel with threads");
-            long sum = 0;
+            int sum = 0;
             Stopwatch sw = new Stopwatch();
-            int processors = Environment.ProcessorCount;
-            Thread[] threads = new Thread[processors];
-            
-            int arrPartsCnt = numbers.Length / processors;
-            
             sw.Start();
-            for (int i = 0; i < processors; i++)
-            {
-                // делим массив по числу вычислительных ядер
-                int startIndex = i * arrPartsCnt;
-                int endIndex = i == processors - 1 ? numbers.Length - 1 : startIndex + arrPartsCnt - 1;
-                long currSum = 0;
-                Thread thread = new Thread(() =>
-                {
-                    for (int j = startIndex; j <= endIndex; j++)
-                    {
-                        currSum += numbers[j];
-                    }
-                    Interlocked.Add(ref sum, currSum);
-                });
-                threads[i] = thread;
-                thread.Start();
-            }
-
-            foreach (Thread thread in threads)
-            {
-                thread.Join();
-            }
+            //
             sw.Stop();
-            Console.WriteLine("parallel with threads: " + sum);
             return sw.Elapsed;
         }
         
         private TimeSpan SummParallel_withLinq(int[] numbers)
         {
-            Console.WriteLine("Start counting parallel with LINQ");
-            long sum = 0;
+            int sum = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            sum = numbers.AsParallel().Sum();
+            //
             sw.Stop();
-            Console.WriteLine("parallel with LINQ: " + sum);
             return sw.Elapsed;
         }
     }
