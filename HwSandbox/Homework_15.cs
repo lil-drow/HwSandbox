@@ -59,27 +59,27 @@ namespace HwSandbox
 
             // Замерьте время выполнения для 100 000,
             tableWriter.Add(["Число интов", "Синхронно", "Параллельно (Threads)", "Параллельно (LINQ)"]);
-            bool random = true;
+            bool isRandom = true;
 
-            tableWriter.Add(await GetSummResults(100000, random));
+            tableWriter.Add(await GetSummResults(100000, isRandom));
 
             // 1 000 000
-            tableWriter.Add(await GetSummResults(1000000, random));
+            tableWriter.Add(await GetSummResults(1000000, isRandom));
 
             // и 10 000 000
-            tableWriter.Add(await GetSummResults(10000000, random));
+            tableWriter.Add(await GetSummResults(10000000, isRandom));
 
 
             // дополнительный тест с другой выборкой (что, если взять не рандомные числа, а последовательные)
-            random = false;
+            isRandom = false;
 
-            tableWriter.Add(await GetSummResults(100000, random));
+            tableWriter.Add(await GetSummResults(100000, isRandom));
 
             // 1 000 000
-            tableWriter.Add(await GetSummResults(1000000, random));
+            tableWriter.Add(await GetSummResults(1000000, isRandom));
 
             // и 10 000 000
-            tableWriter.Add(await GetSummResults(10000000, random));
+            tableWriter.Add(await GetSummResults(10000000, isRandom));
 
 
             tableWriter.Write();
