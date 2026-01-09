@@ -1,7 +1,9 @@
-﻿using System;
+﻿using HwSandbox.Implementations;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -50,19 +52,36 @@ namespace HwSandbox
             int processors = Environment.ProcessorCount;
             string osVersion = Environment.OSVersion.VersionString;
             
+
+            TableWriter tableWriter = new TableWriter();
+            tableWriter.Add(["Количество вычислительных ядер: ", processors.ToString()]);
+            tableWriter.Add(["Версия ОС: ", osVersion]);
+
             // Замерьте время выполнения для 100 000,
-            Console.WriteLine("Выполнение замеров для суммирования 100 000 элементов.");
-            await Summ(100000);
-            Console.WriteLine("------------------");
+            tableWriter.Add(["Число интов", "Синхронно", "Параллельно (Threads)", "Параллельно (LINQ)"]);
+            tableWriter.Add(await GetSummResults(100000));
+
             // 1 000 000
-            Console.WriteLine("Выполнение замеров для суммирования 1 000 000 элементов.");
-            await Summ(1000000);
-            Console.WriteLine("------------------");
+            tableWriter.Add(await GetSummResults(1000000));
+
             // и 10 000 000
-            Console.WriteLine("Выполнение замеров для суммирования 10 000 000 элементов.");
-            await Summ(10000000);
-            Console.WriteLine("------------------");
+            tableWriter.Add(await GetSummResults(10000000));
+            tableWriter.Write();
             Console.WriteLine("Готово.");
+        }
+        private async Task<string[]> GetSummResults(int quantity)
+        {
+            Console.WriteLine($"Выполнение замеров для суммирования {quantity} элементов.");
+            string[] valuesArray = new string[4];
+            int cellCounter = 1;
+            valuesArray[0] = quantity.ToString();
+
+            foreach (var item in await Summ(quantity))
+            {
+                valuesArray[cellCounter++] = item.ToString();
+            }
+            Console.WriteLine("------------------");
+            return valuesArray;
         }
         //Напишите вычисление суммы элементов массива интов:
         private Task<TimeSpan[]> Summ(int quantity)
@@ -76,11 +95,11 @@ namespace HwSandbox
                 nums[i] = random.Next();
             }
             // Обычное
-            results[0] = Task.Run(() => SummSync(nums)).Result;
+            results[0] = SummSync(nums);
             // Параллельное (для реализации использовать Thread, например List)
-            results[1] = Task.Run(() => SummParallel_withThreads(nums)).Result;
+            results[1] = SummParallel_withThreads(nums);
             // Параллельное с помощью LINQ
-            results[2] =  Task.Run(() => SummParallel_withLinq(nums)).Result;
+            results[2] = SummParallel_withLinq(nums);
             return Task.FromResult(results);
         }
         
@@ -109,7 +128,7 @@ namespace HwSandbox
             
             int arrPartsCnt = numbers.Length / processors;
             
-            sw.Start();
+            
             for (int i = 0; i < processors; i++)
             {
                 // делим массив по числу вычислительных ядер
@@ -125,11 +144,13 @@ namespace HwSandbox
                     Interlocked.Add(ref sum, currSum);
                 });
                 threads[i] = thread;
-                thread.Start();
             }
 
+            sw.Start();
+            // 
             foreach (Thread thread in threads)
             {
+                thread.Start();
                 thread.Join();
             }
             sw.Stop();
