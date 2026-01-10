@@ -1,17 +1,7 @@
-﻿using HwSandbox.Implementations;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using HwSandbox.Abstractions;
-
-namespace HwSandbox
-{
-    /*
-     * Многопоточный проект
+/*
+    Многопоточный проект
     Цель:
     Применение разных способов распараллеливания задач и оценка оптимального способа реализации.
 
@@ -38,10 +28,12 @@ namespace HwSandbox
 
     Минимальный проходной балл: 8.
     */
+namespace HwSandbox
+{
     internal class Homework_15: IHomework
     {
-        IDataWriter? _tableWriter;
-        public Homework_15(IDataWriter? tableWriter) => _tableWriter = tableWriter; 
+        IDataWriter _tableWriter;
+        public Homework_15(IDataWriter tableWriter) => _tableWriter = tableWriter; 
         
         public async void Go()
         {
