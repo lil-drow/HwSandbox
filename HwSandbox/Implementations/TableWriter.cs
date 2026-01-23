@@ -2,7 +2,7 @@
 
 namespace HwSandbox.Implementations
 {
-    internal class TableWriter: IDataWriter
+    internal class TableWriter: DataWriter
     {
         public string Name { get; private set; }
         public string Path { get; private set; }
@@ -16,12 +16,12 @@ namespace HwSandbox.Implementations
              Path = tablePath;
              Type = "csv";
         }
-        public void Add(string[] valuesString)
+        public override void Add(string[] valuesString)
         {
             _valuesToWrite.Add(valuesString);
         }
 
-        public int Write()
+        public override int Write()
         {
             if (string.IsNullOrEmpty(Name))
             {

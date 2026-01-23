@@ -1,6 +1,7 @@
-﻿namespace HwSandbox.Abstractions
+﻿using HwSandbox.Abstractions.Interfaces;
+namespace HwSandbox.Abstractions
 {
-    public interface IDataWriter
+    public abstract class DataWriter: IWritable
     {
         public string Name { get; }
         public string Path { get; }
@@ -10,10 +11,10 @@
         /// Добавление значений для последующей записи
         /// </summary>
         /// <param name="values"> массив добавляемых значений </param>
-        public void Add(string[] values);
+        public abstract void Add(string[] values);
         /// <summary>
         /// Запись значений, добавленных через Add. Возвращает численный код результата выполнения.
         /// </summary>
-        public int Write();
+        public abstract int Write();
     }
 }

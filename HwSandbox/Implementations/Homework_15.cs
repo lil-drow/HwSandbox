@@ -30,12 +30,12 @@ using HwSandbox.Abstractions;
     */
 namespace HwSandbox
 {
-    internal class Homework_15: IHomework
+    internal class Homework_15: Homework
     {
-        IDataWriter _tableWriter;
-        public Homework_15(IDataWriter tableWriter) => _tableWriter = tableWriter; 
+        DataWriter _tableWriter;
+        public Homework_15(DataWriter tableWriter) => _tableWriter = tableWriter; 
         
-        public async void Go()
+        public override async void Go()
         {
             Console.WriteLine("Лекция 15. Внутрипроцессное взаимодействие:");
             Console.WriteLine("------------------");

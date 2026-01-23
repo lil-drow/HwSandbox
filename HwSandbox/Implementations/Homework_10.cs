@@ -6,13 +6,13 @@ using HwSandbox.Abstractions;
 //Замерьте время выполнения кода (класс Stopwatch).
 namespace HwSandbox
 {
-    internal class Homework_10: IHomework
+    internal class Homework_10: Homework
     {
         internal Homework_10()
         {
 
         }
-        public void Go()
+        public override void Go()
         {
             Console.WriteLine("Лекция 10. Введение в параллелеризм:");
             Console.WriteLine("------------------");
