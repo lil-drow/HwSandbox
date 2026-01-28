@@ -34,16 +34,22 @@ public class Homework_22: Homework
     {
         Console.WriteLine("Лекция 22. Принципы SOLID:");
         Console.WriteLine("------------------");
-        IPlayable Game = new GuessNumGame(new GuessNumGameConsoleConfiguration());
+        
+        // Создаём и настраиваем конфигурацию игры
+        IConfigurable config = new GuessNumGameConsoleConfiguration();
+        config.Configure();
+        
+        // Создаём игру, передавая все зависимости через конструктор (Принцип инверсии зависимостей)
+        IPlayable game = new GuessNumGame(config, new RandomNumGenerator(), new NumComparer(), new NumGetter());
         bool letUsPlay = true;
-        Game.Play();
+        game.Play();
         while (letUsPlay)
         {
-            Console.WriteLine("\nСыграем снова?\nВведите yes (y) или да (д), чтобы продолжить)");
-            string answer = Console.ReadLine().ToLower();
+            Console.WriteLine("\nСыграем снова?\nВведите yes (y) или да (д), чтобы продолжить.");
+            string answer = Console.ReadLine()?.ToLower();
             if (answer is "y" or "д" or "yes" or "да")
             {
-                Game.Play();
+                game.Play();
             }
             else
             {
@@ -53,9 +59,10 @@ public class Homework_22: Homework
         }
         Console.WriteLine("------------------");
     }
-    
 }
 
+// Принцип разделения интерфейса:
+// Функционал разбит на отдельные интерфейсы
 public interface IPlayable
 {
     void Play();
@@ -63,61 +70,67 @@ public interface IPlayable
 
 public interface IConfigurable
 {
-    public int MinValue { get; } 
-    public int MaxValue { get; }
-    public int AttemptsNum { get; }
+    int MinValue { get; }
+    int MaxValue { get; }
+    int AttemptsNum { get; }
     void Configure();
 }
 
-public class GuessNumGameConsoleConfiguration : IConfigurable
+public interface INumGeneratable
 {
-    public int MinValue { get; private set; } 
-    public int MaxValue { get; private set; }
-    public int AttemptsNum { get; private set; }
-
-    public void Configure()
-    {
-        Console.WriteLine("Для начала настроим игру.");
-        Console.WriteLine("Определим количество попыток на отгадывание числа.");
-        AttemptsNum = Extensions.GetPositiveNumValue();
-        Console.WriteLine("\nОпределим нижнюю границу диапазона.");
-        MinValue = Extensions.GetNumValue();
-        Console.WriteLine("\nОпределим верхнюю границу диапазона.");
-        while (MinValue >= MaxValue)
-        {
-            Console.WriteLine("\nЗначение верхней границы должно быть больше значения нижней.");
-            MaxValue = Extensions.GetNumValue();
-        }
-    }
+    int Generate(int min, int max);
 }
 
+public interface INumComparable
+{
+    bool Compare(int refNum, int guessedNum);
+}
+
+public interface INumGettable
+{
+    int GetNumValue();
+    int GetPositiveNumValue();
+}
+
+// Принцип инверсии зависимостей:
+// Класс зависит от абстракций, а не от конкретных реализаций
 public class GuessNumGame : IPlayable
 {
-    IConfigurable _config;
-    int _refNum;
-    int _attemptsNum;
-    public GuessNumGame(IConfigurable config)
+    private readonly IConfigurable _config;
+    private readonly INumGeneratable _generator;
+    private readonly INumComparable _comparer;
+    private readonly INumGettable _gettable;
+
+    // Все зависимости передаются через конструктор
+    public GuessNumGame(
+        IConfigurable config,
+        INumGeneratable generator,
+        INumComparable comparer,
+        INumGettable gettable)
     {
         _config = config;
-        _config.Configure();
+        _generator = generator;
+        _comparer = comparer;
+        _gettable = gettable;
     }
+
     public void Play()
     {
-        _attemptsNum = _config.AttemptsNum;
+        int attemptsNum = _config.AttemptsNum;
         Console.WriteLine("\nЗагадываю число...");
-        _refNum = Extensions.GenerateRefNum(_config.MinValue, _config.MaxValue);
+        int refNum = _generator.Generate(_config.MinValue, _config.MaxValue);
         Console.WriteLine("Готово!");
         bool userWon = false;
-        while (!userWon && _attemptsNum > 0)
+        while (!userWon && attemptsNum > 0)
         {
-            _attemptsNum--;
+            attemptsNum--;
             Console.WriteLine("\nКакое число было загадано?");
-            int guessedNum = Extensions.GetNumValue();
-            userWon = Extensions.CompareNums(_refNum, guessedNum);
+            int guessedNum = _gettable.GetNumValue();
+            userWon = _comparer.Compare(refNum, guessedNum);
         }
         if (userWon)
         {
-            Console.WriteLine($"Вы выиграли!\nБыло загадано число {_refNum}.");
+            Console.WriteLine($"Вы выиграли!\nБыло загадано число {refNum}.");
         }
         else
         {
@@ -126,9 +139,42 @@ public class GuessNumGame : IPlayable
     }
 }
 
-public static class Extensions
+// Принцип единственной ответственности:
+// Классы отвечают только за одну часть функционала:
+// за настройку параметров игры
+public class GuessNumGameConsoleConfiguration : IConfigurable
 {
-    public static int GetNumValue()
+    public int MinValue { get; private set; } 
+    public int MaxValue { get; private set; }
+    public int AttemptsNum { get; private set; }
+    
+    private readonly INumGettable _gettable;
+
+    public GuessNumGameConsoleConfiguration()
+    {
+        _gettable = new NumGetter();
+    }
+
+    public void Configure()
+    {
+        Console.WriteLine("Для начала настроим игру.");
+        Console.WriteLine("Определим количество попыток на отгадывание числа.");
+        AttemptsNum = _gettable.GetPositiveNumValue();
+        Console.WriteLine("\nОпределим нижнюю границу диапазона.");
+        MinValue = _gettable.GetNumValue();
+        Console.WriteLine("\nОпределим верхнюю границу диапазона.");
+        while (MinValue >= MaxValue)
+        {
+            Console.WriteLine("\nЗначение верхней границы должно быть больше значения нижней.");
+            MaxValue = _gettable.GetNumValue();
+        }
+    }
+}
+
+// за получение данных из консоли
+public class NumGetter : INumGettable
+{
+    public int GetNumValue()
     {
         string input = string.Empty;
         int result = 0;
@@ -138,8 +184,9 @@ public static class Extensions
             input = Console.ReadLine();
         }
         return result;
-    } 
-    public static int GetPositiveNumValue()
+    }
+
+    public int GetPositiveNumValue()
     {
         string input = string.Empty;
         int result = 0;
@@ -149,15 +196,24 @@ public static class Extensions
             input = Console.ReadLine();
         }
         return result;
-    } 
-    // загадываем число
-    public static int GenerateRefNum(int min, int max)
-    {
-        Random rnd = new Random();
-        return rnd.Next(min, max);
     }
-    // обрабатываем предположение пользователя: сравниваем предполагаемое число с загаданным
-    public static bool CompareNums(int refNum, int guessedNum)
+}
+
+// за генерацию случайного числа в заданном диапазоне
+public class RandomNumGenerator : INumGeneratable
+{
+    private readonly Random _rnd = new Random();
+
+    public int Generate(int min, int max)
+    {
+        return _rnd.Next(min, max);
+    }
+}
+
+// за сравнение предполагаемого числа с загаданным
+public class NumComparer : INumComparable
+{
+    public bool Compare(int refNum, int guessedNum)
     {
         if (guessedNum == refNum)
         {
@@ -175,3 +231,25 @@ public static class Extensions
     }
 }
 
+// Принцип подстановки Лисков:
+// если заменить настройку игры из консоли конфигурацией с предустановленными значениями, работа игры не изменится.
+// Принцип открытости/закрытости:
+// класс остаётся открытым для расширения, но закрытым для модификации заданных условий.
+public class GuessNumGamePresetConfiguration : IConfigurable
+{
+    public int MinValue { get; }
+    public int MaxValue { get; }
+    public int AttemptsNum { get; }
+
+    public GuessNumGamePresetConfiguration(int minValue, int maxValue, int attemptsNum)
+    {
+        MinValue = minValue;
+        MaxValue = maxValue;
+        AttemptsNum = attemptsNum;
+    }
+    
+    public void Configure()
+    {
+        Console.WriteLine($"Заданы настройки: диапазон {MinValue}-{MaxValue}, попытки: {AttemptsNum}");
+    }
+}
