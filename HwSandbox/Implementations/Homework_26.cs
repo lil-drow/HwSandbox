@@ -1,9 +1,6 @@
 using HwSandbox.Abstractions;
-using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace HwSandbox.Implementations;
@@ -83,7 +80,7 @@ public class Homework_26 : Homework
         Console.WriteLine($"  Время на вывод в консоль = {stopwatch.ElapsedMilliseconds} мс");
         Console.WriteLine();
 
-        // замер времени моей десериализации
+        // замер времени десериализации классом-сериализатором
         stopwatch.Restart();
         F deserializedObject = null;
         
@@ -163,7 +160,7 @@ public class Homework_26 : Homework
         public static F Get() => new F() { i1 = 1, i2 = 2, i3 = 3, i4 = 4, i5 = 5 };
     }
 
-    // коасс-сериализатор CSV 
+    // класс-сериализатор CSV 
     public class CsvSerializer
     {
         public string Serialize<T>(T obj)
