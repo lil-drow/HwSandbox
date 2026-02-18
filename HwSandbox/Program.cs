@@ -6,7 +6,7 @@ using HwSandbox.Implementations;
 
 Console.WriteLine("Проект для подготовки домашнего задания в рамках обучения на курсе Отус.");
 IServiceCollection services = new ServiceCollection().AddTransient<DataWriter, TableWriter>()
-                                                    .AddTransient<Homework, Homework_17>();
+                                                    .AddTransient<Homework, Homework_30>();
 
 var serviceProvider = services.BuildServiceProvider();
 Homework homework = serviceProvider.GetService<Homework>();

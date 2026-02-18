@@ -27,12 +27,55 @@ namespace HwSandbox.Implementations;
  */
 public class Homework_30: Homework
 {
-    public Homework_30()
-    {
-        
-    }
+    // Планирую рассмотреть работу с делегатами и событиями на примере юридической практики.
     public override void Go()
     {
+        Console.WriteLine("Лекция 30. Делегаты и события:");
+        Console.WriteLine("------------------");
+        // будем искать самые дорогие судебные дела
+        TestGetMax();
+        Console.WriteLine("------------------");
+        // и просматривать папки с документами
+        TestFileSearch();
+        Console.WriteLine("------------------");
+    }
+
+    private void TestGetMax()
+    {
         
     }
+
+    private void TestFileSearch()
+    {
+        
+    }
+}
+
+public class Case
+{
+    /// <summary>
+    /// Номер дела
+    /// </summary>
+    public string CaseNumber { get; }
+    /// <summary>
+    /// Сумма иска (в рублях)
+    /// </summary>
+    public decimal ClaimAmount { get; }
+    /// <summary>
+    /// Вероятность выигрыша (от 0 до 1)
+    /// </summary>
+    public float WinProbability { get; }
+    
+    public Case(string number, decimal amount, float probability)
+    {
+        CaseNumber = number;
+        ClaimAmount = amount;
+        WinProbability = probability;
+    }
+}
+
+public class FileArgs : EventArgs
+{
+    public string FileName { get; }
+    public FileArgs(string fileName) => FileName = fileName;
 }
