@@ -69,6 +69,11 @@ public class Homework_30: Homework
         searcher.FileFound += (sender, e) =>
         {
             Console.WriteLine($"  Найден: {e.FileName}");
+            if (e.FileName.Contains("Апелляционная"))
+            {
+                Console.WriteLine("...Останавливаем поиск.");
+                ((FileSearcher)sender).CancelSearch();
+            }
         };
         
         searcher.Search(tempDir);
@@ -113,10 +118,14 @@ public class FileSearcher
     
     public void Search(string path)
     {
+        _cancel = false;
         foreach (string file in Directory.GetFiles(path))
         {
+            if (_cancel) break;
             OnFileFound(new FileArgs(Path.GetFileName(file)));
         }
     }
+    
+    public void CancelSearch() => _cancel = true;
     protected virtual void OnFileFound(FileArgs e) => FileFound?.Invoke(this, e);
 }
