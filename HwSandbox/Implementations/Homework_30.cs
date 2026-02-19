@@ -42,12 +42,27 @@ public class Homework_30: Homework
 
     private void TestGetMax()
     {
+        Console.WriteLine("1. Поиск максимального элемента:\n");
         
+        var cases = new List<Case>
+        {
+            new("А07-2048/25", 1_500_000m, 0.85f),
+            new("02-512/24", 750_000m, 0.65f),
+            new("01-128/23", 2_500_000m, 0.92f),
+            null,
+            new("А56-032/22", 8_900_000m, 0.45f)
+        };
+
+        var maxClaim = cases.GetMax(c => (float)c.ClaimAmount);
+        Console.WriteLine($"Макс. сумма иска: {maxClaim?.CaseNumber} - {maxClaim?.ClaimAmount:C}\n");
+        
+        var maxWin = cases.GetMax(c => c.WinProbability);
+        Console.WriteLine($"Макс. вероятность: {maxWin?.CaseNumber} - {maxWin?.WinProbability:P1}\n");
     }
 
     private void TestFileSearch()
     {
-        Console.WriteLine("Поиск файлов с событиями:\n");
+        Console.WriteLine("2. Поиск файлов с событиями:\n");
         
         string tempDir = Path.Combine(Path.GetTempPath(), $"Legal_{DateTime.Now:yyyyMMdd_HHmmss}");
         Directory.CreateDirectory(tempDir);
@@ -79,6 +94,35 @@ public class Homework_30: Homework
         searcher.Search(tempDir);
         Directory.Delete(tempDir, true);
         Console.WriteLine("\nДиректория удалена.");
+    }
+}
+
+public static class Extensions
+{
+    public static T GetMax<T>(this IEnumerable<T> collection, Func<T, float> converter) where T : class
+    {
+        if (collection == null) throw new ArgumentNullException(nameof(collection));
+        if (converter == null) throw new ArgumentNullException(nameof(converter));
+        
+        T maxItem = null;
+        float maxValue = float.MinValue;
+        bool hasItems = false;
+        
+        foreach (var item in collection)
+        {
+            if (item == null) continue;
+            
+            float value = converter(item);
+            if (!hasItems || value > maxValue)
+            {
+                maxValue = value;
+                maxItem = item;
+                hasItems = true;
+            }
+        }
+        
+        if (!hasItems) throw new InvalidOperationException("Нет элементов для сравнения");
+        return maxItem;
     }
 }
 
@@ -118,6 +162,8 @@ public class FileSearcher
     
     public void Search(string path)
     {
+        if (!Directory.Exists(path)) return;
+        
         _cancel = false;
         foreach (string file in Directory.GetFiles(path))
         {
