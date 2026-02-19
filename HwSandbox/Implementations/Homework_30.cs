@@ -47,7 +47,33 @@ public class Homework_30: Homework
 
     private void TestFileSearch()
     {
+        Console.WriteLine("Поиск файлов с событиями:\n");
         
+        string tempDir = Path.Combine(Path.GetTempPath(), $"Legal_{DateTime.Now:yyyyMMdd_HHmmss}");
+        Directory.CreateDirectory(tempDir);
+        
+        string[] files = {
+            "Исковое_заявление.docx",
+            "Решение_суда.pdf",
+            "Апелляционная_жалоба.docx",
+            "Договор.pdf",
+            "Исполнительный_лист.pdf"
+        };
+        
+        foreach (string file in files)
+            File.Create(Path.Combine(tempDir, file)).Dispose();
+        
+        Console.WriteLine($"Создано {files.Length} файлов\n");
+        
+        var searcher = new FileSearcher();
+        searcher.FileFound += (sender, e) =>
+        {
+            Console.WriteLine($"  Найден: {e.FileName}");
+        };
+        
+        searcher.Search(tempDir);
+        Directory.Delete(tempDir, true);
+        Console.WriteLine("\nДиректория удалена.");
     }
 }
 
@@ -78,4 +104,19 @@ public class FileArgs : EventArgs
 {
     public string FileName { get; }
     public FileArgs(string fileName) => FileName = fileName;
+}
+
+public class FileSearcher
+{
+    public event EventHandler<FileArgs> FileFound;
+    private bool _cancel;
+    
+    public void Search(string path)
+    {
+        foreach (string file in Directory.GetFiles(path))
+        {
+            OnFileFound(new FileArgs(Path.GetFileName(file)));
+        }
+    }
+    protected virtual void OnFileFound(FileArgs e) => FileFound?.Invoke(this, e);
 }
